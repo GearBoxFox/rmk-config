@@ -5,11 +5,15 @@
 mod keymap;
 #[macro_use]
 mod macros;
+#[macro_use]
+mod display;
 mod vial;
 
 use defmt::*;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
+use embassy_rp::i2c::{self, Config};
+use embassy_rp::peripherals::{I2C0, I2C1};
 use embassy_rp::{
     bind_interrupts,
     flash::{Async, Flash},
@@ -27,6 +31,11 @@ use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
 
 bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
+});
+
+bind_interrupts!(struct I2CIrqs {
+    I2C0_IRQ => i2c::InterruptHandler<I2C0>;
+    I2C1_IRQ => i2c::InterruptHandler<I2C1>;
 });
 
 const FLASH_SIZE: usize = 2 * 1024 * 1024;
@@ -64,6 +73,15 @@ async fn main(spawner: Spawner) {
         vial_config,
         ..Default::default()
     };
+
+    let mut i2c_config = Config::default();
+    i2c_config.frequency = 400_000;
+
+    spawner
+        .spawn(display::run_display(i2c::I2c::new_async(
+            p.I2C1, p.PIN_7, p.PIN_6, I2CIrqs, i2c_config,
+        )))
+        .unwrap();
 
     // Start serving
     // Use `run_rmk` for blocking flash
