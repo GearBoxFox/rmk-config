@@ -1,3 +1,1 @@
-use embedded_display::{
-    
-}
+use embedded_display::{pixelcolor::BinaryColor, prelude::*};

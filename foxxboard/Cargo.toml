@@ -36,6 +36,7 @@ panic-probe = { version = "0.3", features = ["print-defmt"] }
 
 embedded-graphics = { version = "0.8", optional = true }
 memory-lcd-spi = { version = "0.0.8", git = "https://github.com/andelf/memory-lcd-spi", optional = true }
+embedded-graphics-simulator = "0.7.0"
 
 [patch.crates-io]
 nrf-softdevice = { version = "0.1.0", git = "https://github.com/embassy-rs/nrf-softdevice", rev = "b53991e"}

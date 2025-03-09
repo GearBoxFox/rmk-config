@@ -22,10 +22,8 @@ use embassy_nrf::{
 use panic_probe as _;
 use rmk::{
     ble::SOFTWARE_VBUS,
-    config::{
-        BleBatteryConfig, KeyboardConfig, KeyboardUsbConfig, RmkConfig, StorageConfig, VialConfig,
-    },
-    split::central::{run_peripheral_manager, run_rmk_split_central},
+    config::{BleBatteryConfig, KeyboardUsbConfig, RmkConfig, StorageConfig, VialConfig},
+    split::central::{run_peripheral_monitor, run_rmk_split_central},
 };
 
 use vial::{VIAL_KEYBOARD_DEF, VIAL_KEYBOARD_ID};
@@ -109,11 +107,6 @@ async fn main(spawner: Spawner) {
         ..Default::default()
     };
 
-    let config = KeyboardConfig {
-        rmk_config,
-        ..Default::default()
-    };
-
     let (input_pins, output_pins) =
         config_matrix_pins_nrf!(peripherals: p, input: [P0_12, P0_13], output:  [P0_14, P0_15]);
 
@@ -137,11 +130,11 @@ async fn main(spawner: Spawner) {
             output_pins,
             driver,
             &mut keymap::get_default_keymap(),
-            config,
+            rmk_config,
             central_addr,
             spawner,
         ),
-        run_peripheral_manager::<2, 1, 2, 2>(0, peripheral_addr),
+        run_peripheral_monitor::<2, 1, 2, 2>(0, peripheral_addr),
     )
     .await;
 }
